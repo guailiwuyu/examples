@@ -6,4 +6,4 @@ For more information about these examples,
  including a walkthrough of the stringsvc example,
  see [gokit.io/examples](https://gokit.io/examples).
 
-Add some explanation compare to origin repository.
+Add some notes on the the original repository.
