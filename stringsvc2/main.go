@@ -1,21 +1,21 @@
 package main
 
 import (
-	"net/http"
-	"os"
-
-	stdprometheus "github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-
 	"github.com/go-kit/kit/log"
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	httptransport "github.com/go-kit/kit/transport/http"
+	stdprometheus "github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"net/http"
+	"os"
 )
 
+// Transports expose the service to the network. In this first example we utilize JSON over HTTP.
 func main() {
+	// 采用代理模式，构造代理对象（完成非业务的日志功能）
 	logger := log.NewLogfmtLogger(os.Stderr)
 
-	fieldKeys := []string{"method", "error"}
+	fieldKeys := []string{"method","error"}
 	requestCount := kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "my_group",
 		Subsystem: "string_service",
@@ -36,8 +36,8 @@ func main() {
 	}, []string{}) // no fields here
 
 	var svc StringService
-	svc = stringService{}
-	svc = loggingMiddleware{logger, svc}
+	svc = stringService{}	// 执行实际业务的实例
+	svc = loggingMiddleware{logger, svc}	// 代理实例
 	svc = instrumentingMiddleware{requestCount, requestLatency, countResult, svc}
 
 	uppercaseHandler := httptransport.NewServer(
@@ -58,3 +58,4 @@ func main() {
 	logger.Log("msg", "HTTP", "addr", ":8080")
 	logger.Log("err", http.ListenAndServe(":8080", nil))
 }
+

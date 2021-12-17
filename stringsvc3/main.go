@@ -14,18 +14,21 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 )
 
+// Transports expose the service to the network. In this first example we utilize JSON over HTTP.
 func main() {
+	// 解析命令行参数
 	var (
 		listen = flag.String("listen", ":8080", "HTTP listen address")
 		proxy  = flag.String("proxy", "", "Optional comma-separated list of URLs to proxy uppercase requests")
 	)
 	flag.Parse()
 
+	// 采用代理模式，构造代理对象（完成非业务的日志功能）
 	var logger log.Logger
 	logger = log.NewLogfmtLogger(os.Stderr)
 	logger = log.With(logger, "listen", *listen, "caller", log.DefaultCaller)
 
-	fieldKeys := []string{"method", "error"}
+	fieldKeys := []string{"method","error"}
 	requestCount := kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 		Namespace: "my_group",
 		Subsystem: "string_service",
@@ -43,12 +46,12 @@ func main() {
 		Subsystem: "string_service",
 		Name:      "count_result",
 		Help:      "The result of each count method.",
-	}, []string{})
+	}, []string{}) // no fields here
 
 	var svc StringService
-	svc = stringService{}
+	svc = stringService{}	// 执行实际业务的实例
 	svc = proxyingMiddleware(context.Background(), *proxy, logger)(svc)
-	svc = loggingMiddleware(logger)(svc)
+	svc = loggingMiddleware(logger)(svc)	// 代理实例
 	svc = instrumentingMiddleware(requestCount, requestLatency, countResult)(svc)
 
 	uppercaseHandler := httptransport.NewServer(
@@ -56,6 +59,7 @@ func main() {
 		decodeUppercaseRequest,
 		encodeResponse,
 	)
+
 	countHandler := httptransport.NewServer(
 		makeCountEndpoint(svc),
 		decodeCountRequest,
@@ -68,3 +72,4 @@ func main() {
 	logger.Log("msg", "HTTP", "addr", *listen)
 	logger.Log("err", http.ListenAndServe(*listen, nil))
 }
+

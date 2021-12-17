@@ -2,17 +2,13 @@ package main
 
 import (
 	"fmt"
-	"time"
-
 	"github.com/go-kit/kit/metrics"
+	"time"
 )
 
-func instrumentingMiddleware(
-	requestCount metrics.Counter,
-	requestLatency metrics.Histogram,
-	countResult metrics.Histogram,
-) ServiceMiddleware {
-	return func(next StringService) StringService {
+// 构造一个函数，然后返回函数类型
+func instrumentingMiddleware(requestCount metrics.Counter, requestLatency metrics.Histogram, countResult metrics.Histogram) ServiceMiddleware {
+	return func(next StringService) StringService{
 		return instrmw{requestCount, requestLatency, countResult, next}
 	}
 }
@@ -21,7 +17,7 @@ type instrmw struct {
 	requestCount   metrics.Counter
 	requestLatency metrics.Histogram
 	countResult    metrics.Histogram
-	StringService
+	next           StringService
 }
 
 func (mw instrmw) Uppercase(s string) (output string, err error) {
@@ -31,7 +27,7 @@ func (mw instrmw) Uppercase(s string) (output string, err error) {
 		mw.requestLatency.With(lvs...).Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	output, err = mw.StringService.Uppercase(s)
+	output, err = mw.next.Uppercase(s)
 	return
 }
 
@@ -43,6 +39,6 @@ func (mw instrmw) Count(s string) (n int) {
 		mw.countResult.Observe(float64(n))
 	}(time.Now())
 
-	n = mw.StringService.Count(s)
+	n = mw.next.Count(s)
 	return
 }

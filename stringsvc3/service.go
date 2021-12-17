@@ -11,6 +11,7 @@ type StringService interface {
 	Count(string) int
 }
 
+// stringService is a concrete implementation of StringService
 type stringService struct{}
 
 func (stringService) Uppercase(s string) (string, error) {
@@ -27,5 +28,5 @@ func (stringService) Count(s string) int {
 // ErrEmpty is returned when an input string is empty.
 var ErrEmpty = errors.New("empty string")
 
-// ServiceMiddleware is a chainable behavior modifier for StringService.
+// ServiceMiddleware 作为 StringService 的修饰,入参和出参都为StringService类型
 type ServiceMiddleware func(StringService) StringService

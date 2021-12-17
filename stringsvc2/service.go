@@ -11,6 +11,7 @@ type StringService interface {
 	Count(string) int
 }
 
+// stringService is a concrete implementation of StringService
 type stringService struct{}
 
 func (stringService) Uppercase(s string) (string, error) {
@@ -26,3 +27,5 @@ func (stringService) Count(s string) int {
 
 // ErrEmpty is returned when an input string is empty.
 var ErrEmpty = errors.New("empty string")
+
+

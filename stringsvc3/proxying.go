@@ -30,9 +30,9 @@ func proxyingMiddleware(ctx context.Context, instances string, logger log.Logger
 
 	// Set some parameters for our client.
 	var (
-		qps         = 100                    // beyond which we will return an error
-		maxAttempts = 3                      // per request, before giving up
-		maxTime     = 250 * time.Millisecond // wallclock time, before giving up
+		qps         = 100
+		maxAttempts = 3
+		maxTime     = 250 * time.Millisecond
 	)
 
 	// Otherwise, construct an endpoint for each instance in the list, and add
@@ -100,6 +100,7 @@ func makeUppercaseProxy(ctx context.Context, instance string) endpoint.Endpoint 
 	if u.Path == "" {
 		u.Path = "/uppercase"
 	}
+
 	return httptransport.NewClient(
 		"GET",
 		u,
